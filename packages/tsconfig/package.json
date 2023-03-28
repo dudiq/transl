@@ -1,0 +1,10 @@
+{
+  "name": "@transl/tsconfig",
+  "version": "0.2.1",
+  "private": true,
+  "main": "base.json",
+  "files": [
+    "base.json",
+    "react-library.json"
+  ]
+}

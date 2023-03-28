@@ -1,0 +1,17 @@
+{
+  "extends": "./packages/tsconfig/base.json",
+  "exclude": ["node_modules", "**/*/dist", "**/*.test.ts"],
+  "compilerOptions": {
+    // Disable emitting file from a compilation.
+    // We'll use esbuild to compile our TypeScript files to JavaScript, so we
+    // avoid emitting files when using tsc (and use it only for type-checking).
+    "noEmit": true,
+    // Specify the base directory and workspace paths to allow importing
+    // workspace packages as npm dependencies.
+    "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
+    "paths": {
+      "@transl/*": ["./apps/*", "./packages/*"]
+    }
+  }
+}
