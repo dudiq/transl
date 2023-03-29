@@ -4,10 +4,11 @@ import { Events } from './events'
 
 export const MainPage = () => {
   return (
-    <>
+    <div className="m-2">
       <div className="flex items-center justify-center">
         <div className="text-md m-10">
-          Welcome to the transl. Make subtitles locally with Whisper and nextjs
+          Welcome to the transl. Convert video to text locally with Whisper and
+          nextjs
         </div>
       </div>
       <div className="gap-2 sm:flex">
@@ -18,6 +19,6 @@ export const MainPage = () => {
           <Events />
         </div>
       </div>
-    </>
+    </div>
   )
 }

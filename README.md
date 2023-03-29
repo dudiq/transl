@@ -10,4 +10,4 @@ Install:
 - yarn install
 - yarn dev
 
-open localhost:3000 and upload few video files to extract text
+open localhost:4545 and upload few video files to extract text

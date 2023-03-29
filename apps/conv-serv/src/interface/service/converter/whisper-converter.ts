@@ -5,7 +5,7 @@ import ms from 'ms'
 
 const whisperMain = which.sync('whisper')
 
-type ModelType = 'tiny' | 'small' | 'middle' | 'large'
+type ModelType = 'tiny' | 'small' | 'medium' | 'large'
 
 type Args = {
   model: ModelType
