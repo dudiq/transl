@@ -1,70 +1,25 @@
-import React, { useCallback, useState } from 'react'
+import React from 'react'
 import { Button } from '~/modules/ui-kit/button'
 import { Loader } from '~/modules/ui-kit/loader'
-import { FilesForUpload } from './files-for-upload'
-import { SERVER_API } from '~/constants'
+import { FilesForUpload } from '../files-for-upload'
 import { Dropdown } from '~/modules/ui-kit/dropdown'
+import { useUploadForm } from './use-upload-form'
+import { ModelValueObject } from '~/modules/convert/core/model.value-object'
+import { RunnerValueObject } from '~/modules/convert/core/runner.value-object'
 
 export function UploadForm() {
-  const [isLoading, setIsLoading] = React.useState(false)
-  const inputFileRef = React.useRef<HTMLInputElement | null>(null)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>()
-  const [selectedModel, handleChangeModel] = useState('large')
-
-  const handleRemoveFile = useCallback((file: File) => {
-    setSelectedFiles((oldFiles) => {
-      return oldFiles?.filter((existFile) => file !== existFile)
-    })
-  }, [])
-
-  const handleChange = useCallback(() => {
-    if (!inputFileRef.current) return
-
-    const files = inputFileRef.current?.files
-    if (!files) return
-
-    setSelectedFiles([...(selectedFiles || []), ...Array.from(files)])
-
-    inputFileRef.current.value = ''
-  }, [selectedFiles])
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault()
-    /* If file is not selected, then show alert message */
-    if (!selectedFiles?.length) {
-      alert('Please, select file you want to upload')
-      return
-    }
-
-    setIsLoading(true)
-
-    /* Add files to FormData */
-    const formData = new FormData()
-    Object.values(selectedFiles).forEach((file) => {
-      formData.append('file', file)
-    })
-
-    formData.append('model', selectedModel)
-
-    /* Send request to our api route */
-    const response = await fetch(`${SERVER_API}/api/upload`, {
-      method: 'POST',
-      body: formData,
-    })
-
-    const body = (await response.json()) as {
-      status: 'ok' | 'fail'
-      message: string
-    }
-
-    if (body.status === 'fail') {
-      alert(body.message)
-    } else {
-      setSelectedFiles([])
-    }
-
-    setIsLoading(false)
-  }
+  const {
+    handleChangeModel,
+    selectedModel,
+    handleRemoveFile,
+    handleChange,
+    inputFileRef,
+    isLoading,
+    selectedFiles,
+    handleSubmit,
+    selectedRunner,
+    handleChangeRunner,
+  } = useUploadForm()
 
   return (
     <>
@@ -107,12 +62,9 @@ export function UploadForm() {
             </label>
           </div>
 
-          <div>
-            <div className="flex flex-col gap-2">
-              <Button type="submit" disabled={isLoading}>
-                Upload and start recognize
-              </Button>
-              <Dropdown
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              <Dropdown<ModelValueObject>
                 label="Model"
                 onChange={handleChangeModel}
                 value={selectedModel}
@@ -121,7 +73,22 @@ export function UploadForm() {
                 <Dropdown.Option value="medium" title="Medium" />
                 <Dropdown.Option value="small" title="Small" />
               </Dropdown>
+              <Dropdown<RunnerValueObject>
+                label="Runner"
+                onChange={handleChangeRunner}
+                value={selectedRunner}
+              >
+                <Dropdown.Option value="cpu" title="CPU" />
+                <Dropdown.Option value="cuda" title="Graphic card" />
+              </Dropdown>
             </div>
+
+            <div>
+              <Button type="submit" disabled={isLoading}>
+                Upload and start recognize
+              </Button>
+            </div>
+
             {isLoading && <Loader />}
           </div>
 

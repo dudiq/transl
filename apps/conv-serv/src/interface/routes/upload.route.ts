@@ -6,6 +6,8 @@ import { nanoid } from 'nanoid'
 import { incomingVideoPath, uploadsPath } from '../../constants'
 import { routerAsyncStorage } from '../service/router-async-storage'
 import type { FileTextEntity } from '../../core/file-text.entity'
+import { ModelValueObject } from '../../core/model.value-object'
+import { RunnerValueObject } from '../../core/runner.value-object'
 
 /* Don't miss that! */
 export const config = {
@@ -15,6 +17,8 @@ export const config = {
 }
 
 type ProcessedFiles = Array<[string, File]>
+
+const DEFAULT_MODEL = 'medium'
 
 export const uploadRoute = async (
   req: IncomingMessage,
@@ -31,6 +35,8 @@ export const uploadRoute = async (
   let status = 200,
     resultBody = { status: 'ok', message: 'Files were uploaded successfully' }
 
+  const fields: Record<string, string> = {}
+
   /* Get files using formidable */
   const files = await new Promise<ProcessedFiles | undefined>(
     (resolve, reject) => {
@@ -43,6 +49,9 @@ export const uploadRoute = async (
       const files: ProcessedFiles = []
       form.on('file', function (field, file) {
         files.push([field, file])
+      })
+      form.on('field', (fieldName, fieldValue) => {
+        fields[fieldName] = fieldValue
       })
       form.on('end', () => resolve(files))
       form.on('error', (err) => reject(err))
@@ -77,6 +86,11 @@ export const uploadRoute = async (
         fileName: originFileName,
         fullPath: videoFileName,
         text: '',
+        lifeTime: 0,
+        runner: (fields.runner || 'cuda') as RunnerValueObject,
+        model: (fields.model ||
+          process.env.TCS_MODEL ||
+          DEFAULT_MODEL) as ModelValueObject,
         size: stat.size,
       }
       store.processingFiles.push(item)

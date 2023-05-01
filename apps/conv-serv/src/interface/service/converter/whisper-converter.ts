@@ -2,27 +2,44 @@ import { spawn } from 'child_process'
 import fs from 'fs'
 import which from 'which'
 import ms from 'ms'
+import { ModelValueObject } from '../../../core/model.value-object'
+import { RunnerValueObject } from '../../../core/runner.value-object'
 
-const whisperMain = which.sync('whisper')
+const whisperCUDA = which.sync('whisper')
 
-type ModelType = 'tiny' | 'small' | 'medium' | 'large'
+const whisperCPU = which.sync(
+  '../cli-convert/cmd/whisper-blas-bin-x64/main.exe'
+)
 
 type Args = {
-  model: ModelType
+  model: ModelValueObject
   onAppend: (text: string) => void
-  lang: string
   audioFilePath: string
+  runner: RunnerValueObject
 }
 
 function runWhisper(params: Args): Promise<string> {
   return new Promise((resolve, reject) => {
-    const args =
-      `${params.audioFilePath} --device cuda --language ${params.lang} --output_format txt --model ${params.model} --verbose True -o ../../data/incoming/text/`.split(
+    const argsCUDA =
+      `${params.audioFilePath} --device cuda --language Russian --output_format txt --model ${params.model} --verbose True -o ../../data/incoming/text/`.split(
         ' '
       )
 
-    console.log('args', args.join(' '))
-    const whisperProc = spawn(whisperMain, args)
+    const argsCPU =
+      `-l ru -pp -otxt -m ../cli-convert/models/ggml-${params.model}.bin -f ${params.audioFilePath}`.split(
+        ' '
+      )
+
+    console.log('params', params)
+
+    const isCuda = params.runner === 'cuda'
+
+    if (isCuda) console.log('args', argsCUDA.join(' '))
+    if (!isCuda) console.log('args', argsCPU.join(' '))
+
+    const whisperProc = isCuda
+      ? spawn(whisperCUDA, argsCUDA)
+      : spawn(whisperCPU, argsCPU)
 
     const fullPath = `${params.audioFilePath}.txt`
     fs.writeFileSync(fullPath, '')
@@ -71,10 +88,17 @@ function printFileSize(prefix: string, filePath: string): void {
 
 const timeLogs: any[] = []
 
-export async function whisperConverter(
-  audioFilePath: string,
+export async function whisperConverter({
+  audioFilePath,
+  onAppend,
+  model,
+  runner,
+}: {
+  audioFilePath: string
+  runner: RunnerValueObject
   onAppend: (portion: string) => void
-): Promise<string> {
+  model: ModelValueObject
+}): Promise<string> {
   timeLogs.push({
     time: new Date(),
     msg: 'start',
@@ -88,9 +112,9 @@ export async function whisperConverter(
   })
   const text = await runWhisper({
     audioFilePath,
-    lang: 'Russian',
     onAppend,
-    model: (process.env.TCS_MODEL || 'medium') as ModelType,
+    model,
+    runner,
   })
   timeLogs.push({
     time: new Date(),

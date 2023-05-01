@@ -2,12 +2,14 @@ import type { FileTextEntity } from '../../../core/file-text.entity'
 import { incomingAudioPath } from '../../../constants'
 import { extractAudio } from './extract-audio'
 import { whisperConverter } from './whisper-converter'
+import { FileStatusValueObject } from '../../../core/file-status.value-object'
 
-export type HandleText = (
-  id: string,
-  text: string,
-  status: 'processing' | 'done'
-) => void
+export type HandleText = (_: {
+  id: string
+  text: string
+  lifeTime: number
+  status: FileStatusValueObject
+}) => void
 
 export class Converter {
   private files: FileTextEntity[] = []
@@ -39,13 +41,38 @@ export class Converter {
       outputAudioPath,
     })
 
-    this.onText(file.id, '', 'processing')
-
-    const text = await whisperConverter(outputAudioPath, (portion) => {
-      this.onText(file.id, portion, 'processing')
+    this.onText({
+      id: file.id,
+      text: '',
+      status: 'processing',
+      lifeTime: 0,
     })
 
-    this.onText(file.id, text, 'done')
+    const startDate = new Date()
+
+    const text = await whisperConverter({
+      audioFilePath: outputAudioPath,
+      model: file.model,
+      runner: file.runner,
+      onAppend: (portion) => {
+        const nextDate = new Date()
+        this.onText({
+          id: file.id,
+          text: portion,
+          status: 'processing',
+          lifeTime: nextDate.getTime() - startDate.getTime(),
+        })
+      },
+    })
+
+    const endDate = new Date()
+
+    this.onText({
+      id: file.id,
+      text,
+      status: 'done',
+      lifeTime: endDate.getTime() - startDate.getTime(),
+    })
 
     this.isProcessing = false
 

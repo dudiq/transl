@@ -1,5 +1,5 @@
 import React from 'react'
-import { UploadForm } from './upload.form'
+import { UploadForm } from './upload-form/upload.form'
 import { Events } from './events'
 
 export const MainPage = () => {

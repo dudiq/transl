@@ -5,6 +5,21 @@ import { Badge, BadgeType } from '~/modules/ui-kit/badge'
 import { CopyButton } from './copy-button'
 import { FileStatusValueObject } from '~/modules/convert/core/file-status.value-object'
 
+import { intervalToDuration, formatDuration } from 'date-fns'
+import { Button } from '~/modules/ui-kit/button'
+import { download } from '~/modules/convert/ui/processing-files/donwload'
+
+export const customFormatDuration = ({
+  start,
+  end,
+}: {
+  start: number
+  end: number
+}) => {
+  const durations = intervalToDuration({ start, end })
+  return formatDuration(durations)
+}
+
 type Props = {
   files: ProcessingFileEntity[]
 }
@@ -24,14 +39,17 @@ export function ProcessingFiles({ files }: Props) {
             <div key={file.id} className="my-1 flex flex-col gap-2">
               <div className="flex gap-1">
                 <Badge status={statusToType[file.status]}>{file.status}</Badge>
-                <div className="ml-2 text-sm font-bold">
-                  {formatBytes(file.size)}
+                <div className="ml-2 flex gap-2 text-sm">
+                  <div className=" font-bold">{formatBytes(file.size)}</div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 <div className="whitespace-pre">{file.fileName}</div>
               </div>
-
+              <div>
+                processed:{' '}
+                {customFormatDuration({ start: 0, end: file.lifeTime })}
+              </div>
               <div className="flex gap-2">
                 <CopyButton text={file.text} />
                 <textarea
@@ -41,6 +59,9 @@ export function ProcessingFiles({ files }: Props) {
                   placeholder="Wait while file processing"
                   value={file.text}
                 />
+                <Button onClick={() => download(file.fileName, file.text)}>
+                  Download
+                </Button>
               </div>
             </div>
           )

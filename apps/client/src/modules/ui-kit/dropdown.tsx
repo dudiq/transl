@@ -1,16 +1,21 @@
 import { ChangeEvent, ReactNode, useCallback } from 'react'
 
-type Props = {
-  onChange: (value: string) => void
+type Props<T extends string> = {
+  onChange: (value: T) => void
   children: ReactNode
   label?: string
-  value?: string
+  value?: T
 }
 
-export function Dropdown({ children, onChange, label, value }: Props) {
+export function Dropdown<T extends string>({
+  children,
+  onChange,
+  label,
+  value,
+}: Props<T>) {
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
-      onChange(e.target.value)
+      onChange(e.target.value as T)
     },
     [onChange]
   )

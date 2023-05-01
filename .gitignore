@@ -48,3 +48,4 @@ yarn-error.log*
 next-env.d.ts
 apps/cli-convert/cmd/whisper-blas-bin-x64/
 apps/cli-convert/cmd/ffmpeg.exe
+apps/cli-convert/input/

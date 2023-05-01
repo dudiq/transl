@@ -1,9 +1,9 @@
 {
-  "name": "cli-convert",
+  "name": "@transl/cli-convert",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "node run.js"
+    "run": "node run.js"
   },
   "dependencies": {
     "ms": "^2.1.3",

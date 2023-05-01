@@ -13,7 +13,6 @@ function runWhisper(params) {
       `-l ${params.lang} -pp -otxt -m ${params.model} -f ${params.audioFilePath}`.split(
         ' '
       )
-    // const args = `${params.audioFilePath} --language ${params.lang} --output_format txt --model ${params.model}`.split(' ')
     console.log('args', args)
     const wisperProcess = spawn(whisperMain, args)
 
@@ -76,12 +75,8 @@ async function whisperConverter({ inputVideoPath }) {
   })
   await runWhisper({
     audioFilePath,
-    // lang: 'Russian',
-    // model: 'large',
     lang: 'ru',
-    model: './models/ggml-large.bin',
-    //    model: './models/ggml-small.bin'
-    //    model: './models/ggml-medium.bin'
+    model: './models/ggml-medium.bin',
   })
   timeLogs.push({
     time: new Date(),

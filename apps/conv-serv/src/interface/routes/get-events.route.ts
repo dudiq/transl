@@ -31,6 +31,8 @@ export async function getEventsRoute(
           status: item.status,
           size: item.size,
           fileName: item.fileName,
+          model: item.model,
+          lifeTime: item.lifeTime,
           text: item.text,
         }
       }),

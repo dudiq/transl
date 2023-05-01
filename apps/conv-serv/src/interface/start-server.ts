@@ -22,26 +22,29 @@ export async function startServer(
     clients: [],
     onChange: [],
     processingFiles: [
-      //   {
-      //   status: 'done',
+      // {
+      //   status: 'processing',
       //   fullPath: 'path',
       //   text: 'partial',
       //   size: 123,
+      //   lifeTime: 122,
       //   fileName: 'filename',
       //   id: '2323'
       // }
     ],
   }
 
-  converter.subscribeOnText(
-    (id: string, text: string, status: 'processing' | 'done') => {
-      const index = store.processingFiles.findIndex((file) => file.id === id)
-      if (index < 0) return
-      store.processingFiles[index].text = text
-      store.processingFiles[index].status = status
-      store.onChange.forEach((handler) => handler())
-    }
-  )
+  converter.subscribeOnText((params) => {
+    const { id } = params
+    const index = store.processingFiles.findIndex((file) => file.id === id)
+    if (index < 0) return
+    const node = store.processingFiles[index]
+    node.text = params.text
+    node.status = params.status
+    node.lifeTime = params.lifeTime
+
+    store.onChange.forEach((handler) => handler())
+  })
   converter.run()
 
   await routerAsyncStorage.run(store, async () => {
