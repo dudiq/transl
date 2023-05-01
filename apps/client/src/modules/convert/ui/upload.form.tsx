@@ -3,11 +3,13 @@ import { Button } from '~/modules/ui-kit/button'
 import { Loader } from '~/modules/ui-kit/loader'
 import { FilesForUpload } from './files-for-upload'
 import { SERVER_API } from '~/constants'
+import { Dropdown } from '~/modules/ui-kit/dropdown'
 
 export function UploadForm() {
   const [isLoading, setIsLoading] = React.useState(false)
   const inputFileRef = React.useRef<HTMLInputElement | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>()
+  const [selectedModel, handleChangeModel] = useState('large')
 
   const handleRemoveFile = useCallback((file: File) => {
     setSelectedFiles((oldFiles) => {
@@ -41,6 +43,8 @@ export function UploadForm() {
     Object.values(selectedFiles).forEach((file) => {
       formData.append('file', file)
     })
+
+    formData.append('model', selectedModel)
 
     /* Send request to our api route */
     const response = await fetch(`${SERVER_API}/api/upload`, {
@@ -104,11 +108,23 @@ export function UploadForm() {
           </div>
 
           <div>
-            <Button type="submit" disabled={isLoading}>
-              Upload and start recognize
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button type="submit" disabled={isLoading}>
+                Upload and start recognize
+              </Button>
+              <Dropdown
+                label="Model"
+                onChange={handleChangeModel}
+                value={selectedModel}
+              >
+                <Dropdown.Option value="large" title="Large" />
+                <Dropdown.Option value="medium" title="Medium" />
+                <Dropdown.Option value="small" title="Small" />
+              </Dropdown>
+            </div>
             {isLoading && <Loader />}
           </div>
+
           <FilesForUpload files={selectedFiles} onRemove={handleRemoveFile} />
         </div>
       </form>

@@ -1,0 +1,12 @@
+{
+  "name": "cli-convert",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "node run.js"
+  },
+  "dependencies": {
+    "ms": "^2.1.3",
+    "which": "^3.0.0"
+  }
+}
