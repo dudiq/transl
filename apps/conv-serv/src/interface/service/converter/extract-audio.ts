@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import which from 'which'
+import fs from 'fs'
 
 const procPath = which.sync('ffmpeg')
 
@@ -12,6 +13,12 @@ export function extractAudio({
   outputAudioPath: string
 }): Promise<void> {
   return new Promise((resolve, reject) => {
+    if (inputVideoPath.endsWith('wav')) {
+      fs.copyFileSync(inputVideoPath, outputAudioPath)
+      resolve(undefined)
+      return
+    }
+
     const args = [
       '-i',
       inputVideoPath, // input video path

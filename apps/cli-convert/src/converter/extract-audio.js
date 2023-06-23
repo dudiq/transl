@@ -1,10 +1,17 @@
 const spawn = require('child_process').spawn
 const which = require('which')
+const fs = require('fs')
 
 const procPath = which.sync('./cmd/ffmpeg')
 
 function extractAudio(inputVideoPath, outputAudioPath) {
   return new Promise((resolve, reject) => {
+    if (inputVideoPath.endsWith('wav')) {
+      fs.copyFileSync(inputVideoPath, outputAudioPath)
+      resolve(undefined)
+      return
+    }
+
     const args = [
       '-i',
       inputVideoPath, // input video path
