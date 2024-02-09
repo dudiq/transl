@@ -19,6 +19,7 @@ export function UploadForm() {
     handleSubmit,
     selectedRunner,
     handleChangeRunner,
+    withRunnerSelect,
   } = useUploadForm()
 
   return (
@@ -73,14 +74,16 @@ export function UploadForm() {
                 <Dropdown.Option value="medium" title="Medium" />
                 <Dropdown.Option value="small" title="Small" />
               </Dropdown>
-              <Dropdown<RunnerValueObject>
-                label="Runner"
-                onChange={handleChangeRunner}
-                value={selectedRunner}
-              >
-                <Dropdown.Option value="cpu" title="CPU" />
-                <Dropdown.Option value="cuda" title="Graphic card" />
-              </Dropdown>
+              {withRunnerSelect && (
+                <Dropdown<RunnerValueObject>
+                  label="Runner"
+                  onChange={handleChangeRunner}
+                  value={selectedRunner}
+                >
+                  <Dropdown.Option value="cpu" title="CPU" />
+                  <Dropdown.Option value="cuda" title="Graphic card" />
+                </Dropdown>
+              )}
             </div>
 
             <div>

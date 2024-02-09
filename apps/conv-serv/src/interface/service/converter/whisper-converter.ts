@@ -4,31 +4,33 @@ import which from 'which'
 import ms from 'ms'
 import { ModelValueObject } from '../../../core/model.value-object'
 import { RunnerValueObject } from '../../../core/runner.value-object'
+import { RunWhisperArgs } from '../../../core/run-whisper-args'
+import { getWhisperBiasCpu } from './get-whisper-bias-cpu'
+import { getWhisperFasterCpu } from './get-whisper-faster-cpu'
 
 const whisperCUDA = which.sync('whisper')
 
-const whisperCPU = which.sync(
-  '../cli-convert/cmd/whisper-blas-bin-x64/main.exe'
-)
+type TypeCpu = 'bias' | 'faster'
 
-type Args = {
-  model: ModelValueObject
-  onAppend: (text: string) => void
-  audioFilePath: string
-  runner: RunnerValueObject
+function getArgs(typeCpu: TypeCpu, params: RunWhisperArgs) {
+  switch (typeCpu) {
+    case 'bias':
+      return getWhisperBiasCpu(params)
+    case 'faster':
+      return getWhisperFasterCpu(params)
+  }
 }
 
-function runWhisper(params: Args): Promise<string> {
+function runWhisper(params: RunWhisperArgs): Promise<string> {
   return new Promise((resolve, reject) => {
     const argsCUDA =
       `${params.audioFilePath} --device cuda --language Russian --output_format txt --model ${params.model} --verbose True -o ../../data/incoming/text/`.split(
         ' '
       )
 
-    const argsCPU =
-      `-l ru -pp -otxt -m ../cli-convert/models/ggml-${params.model}.bin -f ${params.audioFilePath}`.split(
-        ' '
-      )
+    argsCUDA.push('--initial_prompt', '"Hello, welcome to my lecture."')
+
+    const { whisperPath: whisperCPU, args: argsCPU } = getArgs('faster', params)
 
     console.log('params', params)
 

@@ -4,7 +4,7 @@ export function download(filename: string, text: string): void {
     'href',
     'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
   )
-  element.setAttribute('download', filename)
+  element.setAttribute('download', `${filename}.txt`)
 
   element.style.display = 'none'
   document.body.appendChild(element)

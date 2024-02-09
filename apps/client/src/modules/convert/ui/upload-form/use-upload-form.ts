@@ -4,6 +4,8 @@ import { useLocalStorage } from './use-local-storage'
 import { ModelValueObject } from '~/modules/convert/core/model.value-object'
 import { RunnerValueObject } from '~/modules/convert/core/runner.value-object'
 
+const withRunnerSelect = true
+
 export function useUploadForm() {
   const [isLoading, setIsLoading] = React.useState(false)
   const inputFileRef = React.useRef<HTMLInputElement | null>(null)
@@ -11,7 +13,7 @@ export function useUploadForm() {
   const { storedValue: selectedModel, handleSaveValue: handleChangeModel } =
     useLocalStorage<ModelValueObject>({
       key: '@transl-model',
-      defaultValue: 'large',
+      defaultValue: 'medium',
     })
 
   const { storedValue: selectedRunner, handleSaveValue: handleChangeRunner } =
@@ -54,7 +56,7 @@ export function useUploadForm() {
     })
 
     formData.append('model', selectedModel)
-    formData.append('runner', selectedRunner)
+    formData.append('runner', withRunnerSelect ? selectedRunner : 'cuda')
 
     /* Send request to our api route */
     const response = await fetch(`${SERVER_API}/api/upload`, {
@@ -87,5 +89,6 @@ export function useUploadForm() {
     handleChangeModel,
     handleChangeRunner,
     selectedRunner,
+    withRunnerSelect,
   }
 }
