@@ -1,5 +1,4 @@
 import type { FileTextEntity } from '../../../core/file-text.entity'
-import { incomingAudioPath } from '../../../constants'
 import { extractAudio } from './extract-audio'
 import { whisperConverter } from './whisper-converter'
 import { FileStatusValueObject } from '../../../core/file-status.value-object'
@@ -33,12 +32,9 @@ export class Converter {
     if (!file) return
     this.isProcessing = true
 
-    const outputAudioPath = `${incomingAudioPath}${file.fileName}.wav`
-
-    await extractAudio({
+    const audioFiles = await extractAudio({
       inputVideoPath: file.fullPath,
       fileName: file.fileName,
-      outputAudioPath,
     })
 
     this.onText({
@@ -49,27 +45,31 @@ export class Converter {
     })
 
     const startDate = new Date()
+    let fullText = ''
 
-    const text = await whisperConverter({
-      audioFilePath: outputAudioPath,
-      model: file.model,
-      runner: file.runner,
-      onAppend: (portion) => {
-        const nextDate = new Date()
-        this.onText({
-          id: file.id,
-          text: portion,
-          status: 'processing',
-          lifeTime: nextDate.getTime() - startDate.getTime(),
-        })
-      },
-    })
+    for await (const audioFilePath of audioFiles) {
+      const text = await whisperConverter({
+        audioFilePath,
+        model: file.model,
+        runner: file.runner,
+        onAppend: (portion) => {
+          const nextDate = new Date()
+          this.onText({
+            id: file.id,
+            text: fullText + portion,
+            status: 'processing',
+            lifeTime: nextDate.getTime() - startDate.getTime(),
+          })
+        },
+      })
+      fullText = fullText + text
+    }
 
     const endDate = new Date()
 
     this.onText({
       id: file.id,
-      text,
+      text: fullText,
       status: 'done',
       lifeTime: endDate.getTime() - startDate.getTime(),
     })
