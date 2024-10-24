@@ -6,6 +6,7 @@ node_modules
 .next
 /.pnp
 .pnp.js
+venv
 
 # testing
 /coverage
@@ -52,3 +53,4 @@ apps/cli-convert/input/
 apps/cli-convert/cmd/whisper-faster/
 apps/cli-convert/models/
 
+apps/conv-serv/src/interface/routes/example.ts

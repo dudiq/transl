@@ -33,18 +33,20 @@ const statusToType: Record<FileStatusValueObject, BadgeType> = {
 export function ProcessingFiles({ files }: Props) {
   return (
     <>
-      <div className="flex max-w-3xl flex-col gap-2">
-        {files.map((file) => {
+      <ul className="flex max-w-3xl list-decimal flex-col gap-2">
+        {files.map((file, index) => {
           return (
-            <div key={file.id} className="my-1 flex flex-col gap-2">
+            <li key={file.id} className="my-4 flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
+                <div className="whitespace-pre">
+                  <b>{index}</b> - {file.fileName}
+                </div>
+              </div>
               <div className="flex gap-1">
                 <Badge status={statusToType[file.status]}>{file.status}</Badge>
                 <div className="ml-2 flex gap-2 text-sm">
                   <div className=" font-bold">{formatBytes(file.size)}</div>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <div className="whitespace-pre">{file.fileName}</div>
               </div>
               <div>
                 processed:{' '}
@@ -63,10 +65,10 @@ export function ProcessingFiles({ files }: Props) {
                   Download
                 </Button>
               </div>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </>
   )
 }

@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'http'
 import { nanoid } from 'nanoid'
 import { routerAsyncStorage } from '../service/router-async-storage'
+// import {dataExample} from "./example";
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function getEventsRoute(
   req: IncomingMessage,
@@ -33,7 +34,7 @@ export async function getEventsRoute(
           fileName: item.fileName,
           model: item.model,
           lifeTime: item.lifeTime,
-          text: item.text,
+          text: String(item.text).trim(),
         }
       }),
     }
@@ -48,6 +49,16 @@ export async function getEventsRoute(
   }
 
   onChange()
+
+  // console.log('---dataExample.files', dataExample.files.length)
+  // const check = dataExample.files.map((file: any) => {
+  //   return {
+  //     ...file,
+  //     text: String(file.text).trim(),
+  //   }
+  // })
+  //
+  // sendEvent(JSON.stringify({files: check}))
 
   req.on('close', () => {
     console.log(`${clientId} Connection closed`)

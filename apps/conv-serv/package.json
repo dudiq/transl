@@ -2,7 +2,7 @@
   "name": "@transl/conv-serv",
   "version": "0.1.0",
   "scripts": {
-    "dev": "npx nodemon",
+    "dev": "nodemon src/app.ts",
     "build": "rimraf ./dist && tsc",
     "start": "npm run build && node build/app.js"
   },
@@ -30,9 +30,18 @@
     "esbuild": "^0.17.13",
     "esbuild-jest": "^0.5.0",
     "node-fetch": "^3.3.1",
-    "nodemon": "^2.0.20",
+    "nodemon": "^3.1.4",
     "rimraf": "^4.4.1",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.19.0",
     "typescript": "5.0.2"
+  },
+  "nodemonConfig": {
+    "execMap": {
+      "ts": "tsx"
+    },
+    "ext": "ts",
+    "watch": [
+      "src"
+    ]
   }
 }

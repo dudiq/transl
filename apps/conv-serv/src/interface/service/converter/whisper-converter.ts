@@ -1,16 +1,15 @@
 import { spawn } from 'child_process'
 import fs from 'fs'
-import which from 'which'
 import ms from 'ms'
 import { ModelValueObject } from '../../../core/model.value-object'
 import { RunnerValueObject } from '../../../core/runner.value-object'
 import { RunWhisperArgs } from '../../../core/run-whisper-args'
 import { getWhisperBiasCpu } from './get-whisper-bias-cpu'
 import { getWhisperFasterCpu } from './get-whisper-faster-cpu'
+import { getFastWispCpu } from './get-fast-wisp-cpu'
+import { getWhisper } from './get-whisper'
 
-const whisperCUDA = which.sync('whisper')
-
-type TypeCpu = 'bias' | 'faster'
+type TypeCpu = 'bias' | 'faster' | 'py-fast' | 'cuda'
 
 function getArgs(typeCpu: TypeCpu, params: RunWhisperArgs) {
   switch (typeCpu) {
@@ -18,30 +17,24 @@ function getArgs(typeCpu: TypeCpu, params: RunWhisperArgs) {
       return getWhisperBiasCpu(params)
     case 'faster':
       return getWhisperFasterCpu(params)
+    case 'py-fast':
+      return getFastWispCpu(params)
+    case 'cuda':
+      return getWhisper(params)
   }
 }
 
-function runWhisper(params: RunWhisperArgs): Promise<string> {
+function runWhisper(params: RunWhisperArgs): Promise<void> {
   return new Promise((resolve, reject) => {
-    const argsCUDA =
-      `${params.audioFilePath} --device cuda --language Russian --output_format txt --model ${params.model} --verbose True -o ../../data/incoming/text/`.split(
-        ' '
-      )
-
-    argsCUDA.push('--initial_prompt', '"Hello, welcome to my lecture."')
-
-    const { whisperPath: whisperCPU, args: argsCPU } = getArgs('faster', params)
+    const { whisperPath: whisperCPU, args: argsCPU } = getArgs(
+      params.runner === 'cuda' ? 'cuda' : 'py-fast',
+      params
+    )
 
     console.log('params', params)
+    console.log('args', argsCPU.join(' '))
 
-    const isCuda = params.runner === 'cuda'
-
-    if (isCuda) console.log('args', argsCUDA.join(' '))
-    if (!isCuda) console.log('args', argsCPU.join(' '))
-
-    const whisperProc = isCuda
-      ? spawn(whisperCUDA, argsCUDA)
-      : spawn(whisperCPU, argsCPU)
+    const whisperProc = spawn(whisperCPU, argsCPU)
 
     const fullPath = `${params.audioFilePath}.txt`
     fs.writeFileSync(fullPath, '')
@@ -70,10 +63,7 @@ function runWhisper(params: RunWhisperArgs): Promise<string> {
 
     whisperProc.on('close', (code: number) => {
       console.log(`child process exited with code ${code}`)
-      const content = fs.readFileSync(fullPath, {
-        encoding: 'utf-8',
-      })
-      code === 0 ? resolve(content) : reject()
+      code === 0 ? resolve() : reject()
     })
   })
 }
@@ -112,12 +102,21 @@ export async function whisperConverter({
     time: new Date(),
     msg: 'audio extracted',
   })
-  const text = await runWhisper({
-    audioFilePath,
-    onAppend,
-    model,
-    runner,
+  try {
+    await runWhisper({
+      audioFilePath,
+      onAppend,
+      model,
+      runner,
+    })
+  } catch (e) {
+    console.log('---- error', e)
+  }
+
+  const text = fs.readFileSync(`${audioFilePath}.txt`, {
+    encoding: 'utf-8',
   })
+
   timeLogs.push({
     time: new Date(),
     msg: 'whisper get results',
